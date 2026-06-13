@@ -28,12 +28,13 @@
    npm install
    ```
 
-4. Setup the tokens:
+4. Setup the `.env` file:
 
-   Requires a discord bot token in th e `.env` file or as an environment variable.\
-   Example env file provided
+   Requires a discord bot token in the `.env` file or as an environment variable.\
+   A client id is also required to run the `npm run deploy` command\
+   An Ngrok token is also required to run the `/guildlogin` command but is not required to run the bot or if `/committee-credentials` is used instead
 
-   An Ngrok token is also required to run the `/guildlogin` command
+   Example env file provided `.env.example`
 
 6. Initialize the database:
   
