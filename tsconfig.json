@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // Use a newer target for better compatibility
+    "module": "CommonJS",
+    "strict": false, // Enable strict mode for better type checking
+    "esModuleInterop": true,
+    "skipLibCheck": true, // Skip type checking for declaration files
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js"
+, "deploy-commands.ts"  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

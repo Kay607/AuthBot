@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Document</title>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		#canvasWrapper {
+			background: black;
+				width: 100%;
+				height: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#myInput {
+            position: absolute;  /* remove it from flow */
+            width: 1px;
+            height: 1px;
+            opacity: 0;          /* fully invisible */
+            pointer-events: none; /* optional, avoid accidental clicks */
+            top: 0;              /* or wherever you want it */
+            left: 0;
+        }
+
+	</style>
+</head>
+
+<body>
+	<input type="text" id="myInput" inputmode="text" />
+	<div id="canvasWrapper">
+		<canvas id="screen"></canvas>
+	</div>
+
+
+
+	<script>
+		function isMobile() {
+			return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+				|| ('ontouchstart' in window && window.innerWidth <= 1024);
+		}
+
+		const canvas = document.getElementById('screen');
+		const ctx = canvas.getContext('2d');
+
+
+		function resizeCanvas(width, height) {
+			canvas.width = width;
+			canvas.height = height;
+		}
+
+		if (isMobile()) {
+            canvas.style = 'width: auto; height: 100%; !important';
+        }
+        else {
+            canvas.style = 'width: 100%; height: auto; !important';
+        }
+
+		const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+		let ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+		let onabruptClose = () => {
+			canvas.remove();
+			// If keyboardInput exists, remove it
+			const message = document.createElement("h1");
+			message.textContent = "Connection ended. If you saw the guild page, this was a success, if not, this process failed";
+			document.body.appendChild(message);
+			// Remove input if it exists
+			document.getElementById('canvasWrapper').remove();
+		};
+
+		ws.onmessage = (event) => {
+			const msg = JSON.parse(event.data);
+			if (msg.type === 'hello') {
+				resizeCanvas(msg.width, msg.height);
+			}
+			if (msg.type === 'frame') {
+				const img = new Image();
+				img.src = 'data:image/jpeg;base64,' + msg.data;
+				img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+			}
+			if (msg.type === 'bye') {
+				ws.close();
+				canvas.remove();
+				const message = document.createElement("h1");
+				message.textContent = "Authentication complete, you may now close this tab.";
+				document.body.appendChild(message);
+				onabruptClose = () => {};
+				document.getElementById('canvasWrapper').remove();
+
+
+			}
+		};
+
+		ws.onclose = () => onabruptClose();
+
+		// --------------------- DESKTOP EVENTS --------------------- //
+		// Only attach desktop keyboard if device has physical keyboard
+		if (!isMobile()) {
+			canvas.addEventListener('mousemove', e => {
+				const rect = canvas.getBoundingClientRect(); // get canvas size on screen
+				const scaleX = canvas.width / rect.width;
+				const scaleY = canvas.height / rect.height;
+
+				const x = (e.clientX - rect.left) * scaleX;
+				const y = (e.clientY - rect.top) * scaleY;
+
+				ws.send(JSON.stringify({ type: 'mouse', action: 'move', x, y }));
+			});
+			canvas.addEventListener('mousedown', e => {
+				const rect = canvas.getBoundingClientRect(); // get canvas size on screen
+				const scaleX = canvas.width / rect.width;
+				const scaleY = canvas.height / rect.height;
+
+				const x = (e.clientX - rect.left) * scaleX;
+				const y = (e.clientY - rect.top) * scaleY;
+
+				ws.send(JSON.stringify({ type: 'mouse', action: 'down', x, y }));
+			});
+			canvas.addEventListener('mouseup', e => {
+				const rect = canvas.getBoundingClientRect(); // get canvas size on screen
+				const scaleX = canvas.width / rect.width;
+				const scaleY = canvas.height / rect.height;
+
+				const x = (e.clientX - rect.left) * scaleX;
+				const y = (e.clientY - rect.top) * scaleY;
+
+				ws.send(JSON.stringify({ type: 'mouse', action: 'up', x, y }));
+			});
+
+			
+            window.addEventListener('keydown', e => ws.send(JSON.stringify({ type: 'keyboard', action: 'down', key: e.key })));
+  		    window.addEventListener('keyup', e => ws.send(JSON.stringify({ type: 'keyboard', action: 'up', key: e.key })));
+		}
+
+		else
+		{
+			const input = document.querySelector('#myInput');
+
+			const ontouch = e => {
+				e.preventDefault();
+				input.focus();
+
+				const touch = e.changedTouches[0];
+				const rect = canvas.getBoundingClientRect();
+				const scaleX = canvas.width / rect.width;
+				const scaleY = canvas.height / rect.height;
+
+				const x = (touch.clientX - rect.left) * scaleX;
+				const y = (touch.clientY - rect.top) * scaleY;
+
+				ws.send(JSON.stringify({ type: 'mouse', action: 'move', x, y }));
+				ws.send(JSON.stringify({ type: 'mouse', action: 'down', x, y }));
+				ws.send(JSON.stringify({ type: 'mouse', action: 'up', x, y }));
+			};
+
+			canvas.addEventListener('touchend', ontouch);
+			document.body.addEventListener('touchend', ontouch);
+
+
+			input.focus();
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' || e.key === 'Enter') {
+                    ws.send(JSON.stringify({ type: 'keyboard', action: 'down', key: e.key }));
+					ws.send(JSON.stringify({ type: 'keyboard', action: 'up', key: e.key }));
+
+                    // Do something, e.g., remove a character manually
+                }
+            });
+
+			input.addEventListener('input', (e) => {
+				console.log('Current value:', e.target.value);
+				// Do get request to current server on /test
+
+				if (e.target.value === '') return;
+
+				//fetch('/__' + e.target.value, {method: 'POST',}).catch(error => {});
+				//ws.send(JSON.stringify({ type: 'keyboard', action: 'down', key: e.key }))
+
+				// Send input as keypresses to ws
+				for (let i = 0; i < e.target.value.length; i++) {
+					ws.send(JSON.stringify({ type: 'keyboard', action: 'down', key: e.target.value[i] }));
+					ws.send(JSON.stringify({ type: 'keyboard', action: 'up', key: e.target.value[i] }));
+				}
+
+				// Reset the input value
+				e.target.value = '';
+			});
+		}
+
+	</script>
+
+</body>

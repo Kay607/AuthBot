@@ -1,0 +1,47 @@
+{
+  "name": "authbot",
+  "version": "1.0.0",
+  "description": "A Discord bot that provides Guild of Students Member ID Checks",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/src/index.js",
+    "deploy": "npm run build && node dist/deploy-commands.js",
+    "migrate:data": "npm run build && node dist/src/migrate-data.js --input data.json",
+    "migrate:data:clear": "npm run build && node dist/src/migrate-data.js --input data.json --clear",
+    "dev": "ts-node src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@ngrok/ngrok": "^1.5.2",
+    "axios": "^1.13.2",
+    "better-sqlite3": "^12.10.0",
+    "cheerio": "^1.1.0",
+    "discord.js": "^14.0.0",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.1.0",
+    "jsqr": "^1.4.0",
+    "otpauth": "^9.5.1",
+    "protobufjs": "^8.5.0",
+    "puppeteer": "^24.29.1",
+    "qrcode-reader": "^1.0.4",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^14.18.63",
+    "@types/ws": "^8.0.0",
+    "drizzle-kit": "^0.31.10",
+    "playwright": "^1.56.1",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "",
+  "license": "ISC"
+}

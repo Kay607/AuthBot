@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Remote Browser</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <canvas id="screen"></canvas>
+  <script>
+    const canvas = document.getElementById('screen');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas(width, height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+    onabruptClose = () => {
+      // Remove the canvas and replace with a message
+      canvas.remove();
+      const message = document.createElement("h1");
+      message.textContent = "Connection ended. If you saw the guild page, this was a success, if not, this process failed";
+      document.body.appendChild(message);
+    }
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'hello') {
+        resizeCanvas(msg.width, msg.height);
+      }
+      if (msg.type === 'frame') {
+        const img = new Image();
+        img.src = 'data:image/jpeg;base64,' + msg.data;
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+      if (msg.type === "bye")
+      {
+        ws.close();
+        // Remove the canvas and replace with a message
+        canvas.remove();
+        const message = document.createElement("h1");
+        message.textContent = "Authentication complete, you may now close this tab.";
+        document.body.appendChild(message);
+        onabruptClose = () => {};
+      }
+    };
+
+
+    // Check for websocket close
+    ws.onclose = () => onabruptClose();
+
+
+
+    canvas.addEventListener('mousemove', e => {
+      ws.send(JSON.stringify({ type: 'mouse', action: 'move', x: e.offsetX, y: e.offsetY }));
+    });
+
+    canvas.addEventListener('mousedown', e => {
+      ws.send(JSON.stringify({ type: 'mouse', action: 'down', x: e.offsetX, y: e.offsetY, button: e.button }));
+    });
+
+    canvas.addEventListener('mouseup', e => {
+      ws.send(JSON.stringify({ type: 'mouse', action: 'up', x: e.offsetX, y: e.offsetY, button: e.button }));
+    });
+
+    window.addEventListener('keydown', e => ws.send(JSON.stringify({ type: 'keyboard', action: 'down', key: e.key })));
+    window.addEventListener('keyup', e => ws.send(JSON.stringify({ type: 'keyboard', action: 'up', key: e.key })));
+  </script>
+</body>
+</html>
