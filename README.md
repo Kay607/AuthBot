@@ -29,15 +29,18 @@
    ```
 
 4. Setup the tokens:
+
    Requires a discord bot token in th e `.env` file or as an environment variable.\
    Example env file provided
 
    An Ngrok token is also required to run the `/guildlogin` command
 
-5. Initialize the database:
-   npm run db:push
+6. Initialize the database:
+  
+   `npm run db:push`
 
-6. Deploy commands:
+7. Deploy commands:
+
    Only required if new commands are added or if you are using a new bot user
 
    `npm run deploy`
