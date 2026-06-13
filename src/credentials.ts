@@ -4,7 +4,7 @@ import { getCommitteeRoleIds, pruneExpiredAdmins } from "./db/common";
 import { autoLogin, RefreshTokenStatus } from "./guildHandler";
 import { admins, credentials } from "./schema";
 import { eq, and, lt, inArray } from "drizzle-orm";
-import { OTPCredentials } from "./test";
+import { OTPCredentials } from "./autoOtp";
 
 export async function getAdminDiscordId(guildID: string): Promise<string> {
 

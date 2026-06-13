@@ -1,10 +1,9 @@
 export const clientId = "1437764613750915075";
 
-export const token = "";
+export const token = process.env.BOT_TOKEN || "";
+export const NGROK_AUTH_TOKEN = process.env.NGROK_AUTH_TOKEN || "";
 
 export const TUNEL_TYPE = TunnelType.NGROK;
-
-export const NGROK_AUTH_TOKEN = "";
 
 export const BANNED_MEMBERS = new Set<number>([3006885]);
 

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
-import { generateOTP, OTPCredentials } from './test';
+import { generateOTP, OTPCredentials } from './autoOtp';
 
 
 function requestHasValidToken(response: AxiosResponse): boolean {
