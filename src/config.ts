@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 export const clientId = "1437764613750915075";
 
 export const token = process.env.BOT_TOKEN || "";
